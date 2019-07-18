@@ -1,0 +1,61 @@
+<script src="js/protobuf.min.js"></script>
+<script>
+var ws = new Object()
+
+ws.connect = function (token) {
+  protobuf.load("proto/message.proto", function (err, root) {
+    var Message = root.lookupType("pb.Message")
+    var Req = root.lookupType("pb.Req")
+    var Notify = root.lookupType("pb.Notify")
+    var GetUserInfoReq = root.lookupType("pb.GetUserInfoReq")
+    var ChatNotify = root.lookupType("pb.ChatNotify")
+
+    var websocket = new WebSocket('ws://localhost:8080/ws?token=' + token);
+    websocket.binaryType = "arraybuffer";
+
+    // 连接成功建立的回调方法
+    websocket.onopen = function (event) {
+        console.log("连接成功");
+        console.log(event)
+        // websocket.send(Hello.encode(myHello).finish());
+    }
+    websocket.onerror = function (event) {
+      console.log("连接错误");
+      console.log(event)
+    }
+    // 接收到消息的回调方法
+    websocket.onmessage = function (event) {
+        console.log("接收到消息");
+        console.log(Message.decode(new Uint8Array(event.data)));
+    }
+    // 连接关闭的回调方法
+    websocket.onclose = function (event) {
+        console.log("连接关闭");
+        console.log(event);
+    }
+
+    ws.GetUserInfo = function() {
+      var message = Message.create({
+        req: Req.create({
+          mid: Date.now().toString(),
+          getUserInfoReq: GetUserInfoReq.create({})
+        })
+      })
+      websocket.send(Message.encode(message).finish())
+    }
+
+    ws.Chat = function(str) {
+      var message = Message.create({
+        notify: Notify.create({
+          chatNotify: ChatNotify.create({
+            message: str
+          })
+        })
+      })
+      websocket.send(Message.encode(message).finish())
+    }
+  })
+}
+
+
+</script>

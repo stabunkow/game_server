@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package pb;
+
+message Message {
+  oneof message {
+    Req req = 1;
+    Rsp rsp = 2;
+    Notify notify = 3;
+    Push push = 4;
+  }
+}
+
+message Req {
+  string mid = 1; // message id
+  oneof req { // req type
+    GetUserInfoReq getUserInfoReq = 2;
+  }
+}
+
+message GetUserInfoReq {
+}
+
+message Rsp {
+  string mid = 1;
+  oneof rsp {
+    Error error = 2;
+    GetUserInfoRsp getUserInfoRsp = 3;
+  }
+}
+
+message Error {
+  string message = 1;
+}
+
+message GetUserInfoRsp {
+  User user = 1;
+}
+
+message Notify {
+  oneof notify {
+    ChatNotify chatNotify = 1;
+  }
+}
+
+message ChatNotify {
+  string message = 1;
+}
+
+message Push {
+  oneof push {
+    ChatPush chatPush = 1;
+  }
+}
+
+message ChatPush {
+  string message = 1;
+}
+
+// Service
+
+message String {
+  string value = 1;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string created_at = 3;
+  string updated_at = 4;
+}
+
+service GameService {
+  rpc GetUserInfo (String) returns (User);
+}
